@@ -1,6 +1,7 @@
 package aluno_api.aluno.controller;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,14 +20,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-
 @Tag(name = "aluno-api", description = "API para manter alunos.")
-@Log4j2 
+@Log4j2
 @RequestMapping(path = "/aluno-api") // Define o endpoint base para todas as rotas da API
 
 @RestController // Indica ao Spring que essa será uma classe controller REST
@@ -49,35 +50,56 @@ public class AlunoController {
 
     @Operation(summary = "Criar um aluno com parâmetros", description = "Retorna uma mensagem.")
     @PostMapping(path = "/alunos/param")
-    public ResponseEntity<String> createString(@RequestParam String nome, @RequestParam String email, @RequestParam String cpf, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtNasc, @RequestParam Boolean ativo, @RequestParam float altura) {
+    public ResponseEntity<String> createString(@RequestParam String nome, @RequestParam String email,
+            @RequestParam String cpf, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtNasc,
+            @RequestParam Boolean ativo, @RequestParam float altura) {
         log.info("createString( " + nome + ", " + email + "," + cpf + "," + dtNasc + "," + ativo + "," + altura + " )");
 
-		try {
-			Aluno a = new Aluno(nome, email, cpf, dtNasc, ativo, altura);
+        try {
+            Aluno a = new Aluno(nome, email, cpf, dtNasc, ativo, altura);
 
-			alunoService.save(a);
+            alunoService.save(a);
 
-			return new ResponseEntity<>("Aluno criado com sucesso!", HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+            return new ResponseEntity<>("Aluno criado com sucesso!", HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "Criar aluno com objeto.", description = "Retorna o objeto criado.")
-	@PostMapping(path = "/alunos")
-	public ResponseEntity<AlunoDTO> create(@RequestBody AlunoDTO alunoDTO) {
+    @PostMapping(path = "/alunos")
+    public ResponseEntity<AlunoDTO> create(@RequestBody AlunoDTO alunoDTO) {
 
-		log.info("create( " + alunoDTO + " )");
+        log.info("create( " + alunoDTO + " )");
 
-		try {
-			Aluno a = (Aluno) alunoService.save(new Aluno(alunoDTO.nome(), alunoDTO.email(), alunoDTO.cpf(),
-					alunoDTO.dtNasc(), alunoDTO.ativo(), alunoDTO.altura()));
+        try {
+            Aluno a = (Aluno) alunoService.save(new Aluno(alunoDTO.nome(), alunoDTO.email(), alunoDTO.cpf(),
+                    alunoDTO.dtNasc(), alunoDTO.ativo(), alunoDTO.altura()));
 
-			return new ResponseEntity<>(AlunoDTO.from(a), HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-    
-    
+            return new ResponseEntity<>(AlunoDTO.from(a), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "Atualizar aluno com objeto.", description = "Retorna uma mensagem.")
+    @PutMapping("/alunos/{id}")
+    public ResponseEntity<String> update(@RequestBody AlunoDTO alunoDTO, @PathVariable Integer id) {
+
+        log.info("update( " + alunoDTO + ", Id " + id + " )");
+
+        Optional<Aluno> alunoData = alunoService.findById(id);
+
+        if (alunoData.isPresent()) {
+            Aluno a = alunoData.get();
+            a.setNome(alunoDTO.nome());
+            a.setEmail(alunoDTO.email());
+
+            alunoService.save(a);
+
+            return new ResponseEntity<>("Aluno alterado com sucesso!", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Não foi possível encontrar o Aluno.", HttpStatus.NOT_FOUND);
+        }
+    }
 }
