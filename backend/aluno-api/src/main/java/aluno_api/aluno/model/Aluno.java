@@ -14,15 +14,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // Uso da biblioteca Lombok para criar um construtor vazio "por baixo dos panos"
 @NoArgsConstructor
-// Uso da biblioteca Lombok para criar um construtor completo "por baixo dos panos"
-@AllArgsConstructor
 
 // Uso da biblioteca Lombok para criar Getters e Setters "por baixo dos panos"
 @Getter
@@ -50,4 +47,13 @@ public class Aluno {
     @NotNull(message = "Passagem de um valor positivo é obrigatório")
     @Positive
     private float altura;
+
+    public Aluno(String nome, String email, String cpf, LocalDate dtNasc, Boolean ativo, float altura) {
+        this.nome = nome;
+        this.email = email;
+        this.cpf = cpf;
+        this.dtNasc = dtNasc;
+        this.ativo = ativo;
+        this.altura = altura;
+    }
 }
