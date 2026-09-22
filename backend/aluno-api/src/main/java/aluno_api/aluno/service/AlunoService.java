@@ -17,4 +17,9 @@ public class AlunoService {
         return alunoRepository.findAll();
     }
 
+    // Salva um aluno no banco de dados
+    public Aluno save(Aluno a) {
+        return alunoRepository.save(a);
+    }
+
 }

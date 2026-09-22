@@ -1,9 +1,16 @@
 package aluno_api.aluno.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import aluno_api.aluno.dto.AlunoDTO;
 import aluno_api.aluno.model.Aluno;
 import aluno_api.aluno.model.AlunoRepository;
 import aluno_api.aluno.service.AlunoService;
@@ -13,6 +20,9 @@ import lombok.extern.log4j.Log4j2;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @Tag(name = "aluno-api", description = "API para manter alunos.")
@@ -36,5 +46,38 @@ public class AlunoController {
 
         return alunoRepository.findAll();
     }
+
+    @Operation(summary = "Criar um aluno com parâmetros", description = "Retorna uma mensagem.")
+    @PostMapping(path = "/alunos/param")
+    public ResponseEntity<String> createString(@RequestParam String nome, @RequestParam String email, @RequestParam String cpf, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtNasc, @RequestParam Boolean ativo, @RequestParam float altura) {
+        log.info("createString( " + nome + ", " + email + "," + cpf + "," + dtNasc + "," + ativo + "," + altura + " )");
+
+		try {
+			Aluno a = new Aluno(nome, email, cpf, dtNasc, ativo, altura);
+
+			alunoService.save(a);
+
+			return new ResponseEntity<>("Aluno criado com sucesso!", HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+    }
+
+    @Operation(summary = "Criar aluno com objeto.", description = "Retorna o objeto criado.")
+	@PostMapping(path = "/alunos")
+	public ResponseEntity<AlunoDTO> create(@RequestBody AlunoDTO alunoDTO) {
+
+		log.info("create( " + alunoDTO + " )");
+
+		try {
+			Aluno a = (Aluno) alunoService.save(new Aluno(alunoDTO.nome(), alunoDTO.email(), alunoDTO.cpf(),
+					alunoDTO.dtNasc(), alunoDTO.ativo(), alunoDTO.altura()));
+
+			return new ResponseEntity<>(AlunoDTO.from(a), HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+    
     
 }
