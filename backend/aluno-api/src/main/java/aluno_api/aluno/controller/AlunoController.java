@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.log4j.Log4j2;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -102,4 +103,19 @@ public class AlunoController {
             return new ResponseEntity<>("Não foi possível encontrar o Aluno.", HttpStatus.NOT_FOUND);
         }
     }
+
+    @Operation(summary = "Exclui um aluno por Id.", description = "Retorna uma mensagem.")
+	@DeleteMapping("/alunos/{id}")
+	public ResponseEntity<String> delete(@PathVariable Integer id) {
+
+		log.info("delete( Id " + id + " )");
+
+		try {
+			alunoService.deleteById(id);
+
+			return new ResponseEntity<>("Aluno excluído com sucesso!", HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Não foi possível excluir o Aluno.", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
